@@ -1,0 +1,10 @@
+﻿namespace Resify.Services.ReservationAPI.Models.Dto
+{
+	public class TableDto
+	{
+		public Guid Id { get; set; }
+		public Guid RestaurantId { get; set; }
+		public string? Category { get; set; }
+		public int ChairCount { get; set; }
+	}
+}
