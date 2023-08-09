@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>da562a85-a93a-456a-8a8a-d47f33daa760</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdentityModel" Version="6.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.20" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
+    <PackageReference Include="MMLib.SwaggerForOcelot" Version="6.3.2" />
+    <PackageReference Include="Ocelot" Version="18.0.0" />
+    <PackageReference Include="Ocelot.Cache.CacheManager" Version="18.0.0" />
+    <PackageReference Include="Ocelot.Provider.Polly" Version="18.0.0" />
+  </ItemGroup>
+
+</Project>

@@ -12,13 +12,13 @@ namespace Resify.Services.RestaurantsAPI.Controllers
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize]
-	public class RestuarantsAPIController : ControllerBase
+	public class RestaurantsAPIController : ControllerBase
 	{
 		private readonly AppDbContext _db;
 		private ResponseDto _response;
 		private IMapper _mapper;
 
-		public RestuarantsAPIController(AppDbContext db, IMapper mapper)
+		public RestaurantsAPIController(AppDbContext db, IMapper mapper)
 		{
 			_mapper = mapper;
 			_db = db;

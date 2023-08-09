@@ -1,0 +1,48 @@
+{
+  "SwaggerEndPoints": [
+    {
+      "Key": "GatewayResify",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Resify.GatewaySolution",
+          "Version": "1.0",
+          "Url": "http://localhost:5205/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "products",
+      "TransformByOcelotConfig": true,
+      "Config": [
+        {
+          "Name": "Resify.Services.ProductsAPI",
+          "Version": "1.0",
+          "Url": "http://localhost:5205/location/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "restaurants",
+      "TransformByOcelotConfig": true,
+      "Config": [
+        {
+          "Name": "Resify.Services.RestaurantsAPI",
+          "Version": "1.0",
+          "Url": "http://localhost:5205/catalog/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "tables",
+      "TransformByOcelotConfig": true,
+      "Config": [
+        {
+          "Name": "Resify.Services.TablesAPI",
+          "Version": "1.0",
+          "Url": "http://localhost:5205/catalog/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ]
+}
