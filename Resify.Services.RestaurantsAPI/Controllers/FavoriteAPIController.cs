@@ -12,70 +12,17 @@ namespace Resify.Services.RestaurantsAPI.Controllers
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize]
-	public class RestaurantsAPIController : ControllerBase
+	public class FavoriteAPIController : ControllerBase
 	{
 		private readonly AppDbContext _db;
 		private ResponseDto _response;
 		private IMapper _mapper;
 
-		public RestaurantsAPIController(AppDbContext db, IMapper mapper)
+		public FavoriteAPIController(AppDbContext db, IMapper mapper)
 		{
 			_mapper = mapper;
 			_db = db;
 			_response = new ResponseDto();
-		}
-
-		[HttpGet]
-		public ResponseDto Get()
-		{
-			try
-			{
-				IEnumerable<Restaurant> objList = _db.Restaurants.ToList();
-				_response.Result = _mapper.Map<IEnumerable<RestaurantDto>>(objList);
-			}
-			catch (Exception e)
-			{
-				_response.IsSuccess = false;
-				_response.Message = e.Message;
-			}
-
-			return _response;
-		}
-
-		[HttpGet]
-		[Route("{id:Guid}")]
-		public ResponseDto Get(Guid id)
-		{
-			try
-			{
-				Restaurant obj = _db.Restaurants.First(r => r.Id == id);
-				_response.Result = _mapper.Map<RestaurantDto>(obj);
-			}
-			catch (Exception e)
-			{
-				_response.IsSuccess = false;
-				_response.Message = e.Message;
-			}
-
-			return _response;
-		}
-
-		[HttpGet]
-		[Route("search")]
-		public ResponseDto Search([FromQuery]string query)
-		{
-			try
-			{
-				List<Restaurant> obj = _db.Restaurants.Where(r => r.Name.Contains(query)).ToList();
-				_response.Result = _mapper.Map<List<RestaurantDto>>(obj);
-			}
-			catch (Exception e)
-			{
-				_response.IsSuccess = false;
-				_response.Message = e.Message;
-			}
-
-			return _response;
 		}
 
 		[HttpPost]

@@ -11,7 +11,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI",
-      "UpstreamHttpMethod": [ "Get" ]
+      "UpstreamHttpMethod": [ "Get" ],
+      "SwaggerKey": "products"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -252,7 +253,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/RestaurantsAPI/{id}",
-      "UpstreamHttpMethod": [ "Get" ]
+      "UpstreamHttpMethod": [ "Get" ],
+      "SwaggerKey": "restaurants"
     },
     {
       "DownstreamPathTemplate": "/api/RestaurantsAPI/GetByName/{name}",

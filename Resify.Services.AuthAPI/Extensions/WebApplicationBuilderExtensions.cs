@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Resify.Services.RestaurantsAPI.Extensions
+namespace Resify.Services.AuthAPI.Extensions
 {
 	public static class WebApplicationBuilderExtensions
 	{
 		public static WebApplicationBuilder AddAppAuthentication(this WebApplicationBuilder builder)
 		{
-			var settingSection = builder.Configuration.GetSection("ApiSettings");
+			var settingSection = builder.Configuration.GetSection("ApiSettings:JwtOptions");
 
 			var secret = settingSection.GetValue<string>("Secret");
 			var issuer = settingSection.GetValue<string>("Issuer");

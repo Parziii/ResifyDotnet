@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Resify.Services.RestaurantsAPI.Data;
 
@@ -11,9 +12,10 @@ using Resify.Services.RestaurantsAPI.Data;
 namespace Resify.Services.RestaurantsAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240121145055_AddFavoriteAnd")]
+    partial class AddFavoriteAnd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,15 +30,10 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("RestaurantId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId");
 
                     b.ToTable("FavoriteRestaurants");
                 });
@@ -55,12 +52,12 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("FavoriteRestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Street")
                         .IsRequired()
@@ -72,6 +69,8 @@ namespace Resify.Services.RestaurantsAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FavoriteRestaurantId");
+
                     b.ToTable("Restaurants");
 
                     b.HasData(
@@ -81,7 +80,6 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                             City = "Kraków",
                             Description = "TestowyOpis",
                             Name = "Włoska restauracja",
-                            OwnerId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Street = "Jagielońska 24",
                             ZipCode = "12-345"
                         },
@@ -91,7 +89,6 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                             City = "Kraków",
                             Description = "TestowyOpis2",
                             Name = "Amerykańska restauracja",
-                            OwnerId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Street = "Jagielońska 13",
                             ZipCode = "12-345"
                         });
@@ -131,15 +128,11 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Resify.Services.RestaurantsAPI.Models.FavoriteRestaurant", b =>
+            modelBuilder.Entity("Resify.Services.RestaurantsAPI.Models.Restaurant", b =>
                 {
-                    b.HasOne("Resify.Services.RestaurantsAPI.Models.Restaurant", "Restaurant")
-                        .WithMany()
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Restaurant");
+                    b.HasOne("Resify.Services.RestaurantsAPI.Models.FavoriteRestaurant", null)
+                        .WithMany("Restaurant")
+                        .HasForeignKey("FavoriteRestaurantId");
                 });
 
             modelBuilder.Entity("Resify.Services.RestaurantsAPI.Models.Tag", b =>
@@ -150,6 +143,11 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("Resify.Services.RestaurantsAPI.Models.FavoriteRestaurant", b =>
+                {
                     b.Navigation("Restaurant");
                 });
 #pragma warning restore 612, 618

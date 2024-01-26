@@ -44,22 +44,30 @@ namespace Resify.Services.AuthAPI.Controllers
 				_response.Message = "Username or password is incorrect";
 				return BadRequest(_response);
 			}
+
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Secure = true,
+				SameSite = SameSiteMode.Lax,
+				Path = "/",
+				Expires = DateTime.UtcNow.AddHours(1)
+			};
+
+			Response.Cookies.Append("jwt", loginResponse.Token, cookieOptions);
+
 			_response.Result = loginResponse;
 			return Ok(_response);
 		}
 
-		[HttpPost("AssignRole")]
-		public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDto model)
+		[HttpPost("logout")]
+		public async Task<IActionResult> Logout()
 		{
-			var assignRoleSuccessful = await _authService.AssignRole(model.Email, model.RoleName.ToUpper());
-
-			if (!assignRoleSuccessful)
-			{
-				_response.IsSuccess = false;
-				_response.Message = "Error encountered";
-				return BadRequest(_response);
-			}
-			return Ok(_response);
+			Response.Cookies.Delete("jwt");
+			return Ok();
 		}
+
+
+
 	}
 }

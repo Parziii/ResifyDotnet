@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Resify.Services.AuthAPI.Data;
+using Resify.Services.AuthAPI.Extensions;
 using Resify.Services.AuthAPI.Models;
 using Resify.Services.AuthAPI.Services;
 using Resify.Services.AuthAPI.Services.IService;
@@ -23,6 +24,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.AddAppAuthentication();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

@@ -12,6 +12,10 @@ namespace Resify.Services.RestaurantsAPI
 			{
 				config.CreateMap<RestaurantDto, Restaurant>();
 				config.CreateMap<Restaurant, RestaurantDto>();
+				config.CreateMap<TagDto, Tag>();
+				config.CreateMap<Tag, TagDto>();
+				config.CreateMap<FavoriteRestaurantDto, FavoriteRestaurant>();
+				config.CreateMap<FavoriteRestaurant, FavoriteRestaurantDto>();
 			});
 			return mappingConfig;
 		}

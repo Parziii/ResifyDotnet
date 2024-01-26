@@ -16,22 +16,35 @@ namespace Resify.Services.TablesAPI.Extensions
 
 			var key = Encoding.ASCII.GetBytes(secret);
 
-			builder.Services.AddAuthentication(x =>
-			{
-				x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-				x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-			}).AddJwtBearer(x =>
-			{
-				x.TokenValidationParameters = new TokenValidationParameters
+			builder.Services.AddAuthentication(options =>
 				{
-					ValidateIssuerSigningKey = true,
-					IssuerSigningKey = new SymmetricSecurityKey(key),
-					ValidateIssuer = true,
-					ValidIssuer = issuer,
-					ValidAudience = audience,
-					ValidateAudience = true
-				};
-			});
+					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				})
+				.AddJwtBearer(options =>
+				{
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuerSigningKey = true,
+						IssuerSigningKey = new SymmetricSecurityKey(key),
+						ValidateIssuer = true,
+						ValidIssuer = issuer,
+						ValidateAudience = true,
+						ValidAudience = audience
+					};
+
+					options.Events = new JwtBearerEvents
+					{
+						OnMessageReceived = context =>
+						{
+							if (context.Request.Cookies.TryGetValue("jwt", out string token))
+							{
+								context.Token = token;
+							}
+							return Task.CompletedTask;
+						}
+					};
+				});
 
 			return builder;
 		}

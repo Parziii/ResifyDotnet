@@ -26,32 +26,28 @@ namespace Resify.Services.AuthAPI.Services
 		{
 			ApplicationUser user = new()
 			{
-				UserName = registrationRequestDto.UserName,
+				UserName = Guid.NewGuid().ToString(),
 				Email = registrationRequestDto.Email,
 				NormalizedEmail = registrationRequestDto.Email.ToUpper(),
 				FirstName = registrationRequestDto.FirstName,
-				Surname = registrationRequestDto.Surname,
-				Age = registrationRequestDto.Age,
-				PhoneNumber = registrationRequestDto.PhoneNumber
+				Surname = registrationRequestDto.LastName,
+				BusinessAccount = registrationRequestDto.IsBusiness
 			};
 
 			try
 			{
-				var result =await _userManager.CreateAsync(user, registrationRequestDto.Password);
+				var result =await _userManager.CreateAsync(user, registrationRequestDto.Pwd);
 				if (result.Succeeded)
 				{
-					var userToReturn = _db.ApplicationUsers.First(u => u.UserName == registrationRequestDto.UserName);
+					var userToReturn = _db.ApplicationUsers.First(u => u.Email == registrationRequestDto.Email);
 
 					UserDto userDto = new()
 					{
 						ID = userToReturn.Id,
-						UserName = userToReturn.UserName,
 						FirstName = userToReturn.FirstName,
-						Surname = userToReturn.Surname,
+						LastName = userToReturn.Surname,
 						Email = userToReturn.Email,
-						Age = userToReturn.Age,
-						PhoneNumber = userToReturn.PhoneNumber,
-						BusinessAccount = userToReturn.BusinessAccount
+						IsBuisness = userToReturn.BusinessAccount
 					};
 
 					return "";
@@ -68,9 +64,9 @@ namespace Resify.Services.AuthAPI.Services
 		public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
 		{
 			var user = _db.ApplicationUsers.FirstOrDefault(u =>
-				u.UserName.ToLower() == loginRequestDto.UserName.ToLower());
+				u.Email.ToLower() == loginRequestDto.Email.ToLower());
 
-			bool isValid = user != null && await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+			bool isValid = user != null && await _userManager.CheckPasswordAsync(user, loginRequestDto.Pwd);
 
 			if (user == null || isValid == false)
 			{
@@ -87,13 +83,10 @@ namespace Resify.Services.AuthAPI.Services
 			UserDto userDto = new()
 			{
 				ID = user.Id,
-				UserName = user.UserName,
 				FirstName = user.FirstName,
-				Surname = user.Surname,
+				LastName = user.Surname,
 				Email = user.Email,
-				Age = user.Age,
-				PhoneNumber = user.PhoneNumber,
-				BusinessAccount = user.BusinessAccount
+				IsBuisness = user.BusinessAccount
 			};
 
 			LoginResponseDto loginResponseDto = new LoginResponseDto()
