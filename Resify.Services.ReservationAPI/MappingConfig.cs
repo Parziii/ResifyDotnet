@@ -2,22 +2,17 @@
 using Resify.Services.ReservationAPI.Models;
 using Resify.Services.ReservationAPI.Models.Dto;
 
-namespace Resify.Services.ReservationAPI
+namespace Resify.Services.ReservationAPI;
+
+public class MappingConfig
 {
-	public class MappingConfig
+	public static MapperConfiguration RegisterMaps()
 	{
-		public static MapperConfiguration RegisterMaps()
+		var mappingConfig = new MapperConfiguration(config =>
 		{
-			var mappingConfig = new MapperConfiguration(config =>
-			{
-				config.CreateMap<OrderDetailsDto, OrderDetails>();
-				config.CreateMap<OrderDetails, OrderDetailsDto >();
-				config.CreateMap<ReservationHeaderDto, ReservationHeader>();
-				config.CreateMap<ReservationHeader, ReservationHeaderDto >();
-				config.CreateMap<ReservationDetailsDto, ReservationDetails>();
-				config.CreateMap<ReservationDetails, ReservationDetailsDto >();
-			});
-			return mappingConfig;
-		}
+			config.CreateMap<ReservationDto, Reservation>();
+			config.CreateMap<Reservation, ReservationDto>();
+		});
+		return mappingConfig;
 	}
 }

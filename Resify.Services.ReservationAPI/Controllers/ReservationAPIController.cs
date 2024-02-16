@@ -1,85 +1,91 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Resify.Services.ReservationAPI.Data;
-using Resify.Services.ReservationAPI.Models;
 using Resify.Services.ReservationAPI.Models.Dto;
+using Resify.Services.ReservationAPI.Services;
 
-namespace Resify.Services.ReservationAPI.Controllers
+namespace Resify.Services.ReservationAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class ReservationAPIController : ControllerBase
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class ReservationAPIController : ControllerBase
+
+	private readonly ResponseDto _response;
+	private IReservationService _reservationService;
+
+	public ReservationAPIController(IReservationService reservationService)
 	{
-		private ResponseDto _response;
-		private IMapper _mapper;
-		private readonly AppDbContext _db;
-
-		public ReservationAPIController(IMapper mapper, AppDbContext db)
-		{
-			_response = new ResponseDto();
-			_mapper = mapper;
-			_db = db;
-		}
-
-		[HttpPost("ReservationUpsert")]
-		public async Task<ResponseDto> ReservUpsert(ReservationDto reservationDto)
-		{
-			try
-			{
-				var reservHeaderFromDb =
-					await _db.ReservationHeaders.FirstOrDefaultAsync(u =>
-						u.UserId == reservationDto.ReservationHeader.UserId);
-
-				if (reservHeaderFromDb == null)
-				{
-					ReservationHeader reservationHeader = _mapper.Map<ReservationHeader>(reservationDto.ReservationHeader);
-					_db.ReservationHeaders.Add(reservationHeader);
-					await _db.SaveChangesAsync();
-
-					if (reservationDto.ReservationDetails != null)
-					{
-						foreach (var detail in reservationDto.ReservationDetails)
-						{
-							detail.ReservationHeaderId = reservationHeader.ReservationHeaderId;
-							_db.ReservationDetails.Add(_mapper.Map<ReservationDetails>(detail));
-							await _db.SaveChangesAsync();
-
-							if (detail.OrderDetails == null) continue;
-
-							foreach (var order in detail.OrderDetails)
-							{
-								order.ReservationDetailsId = detail.ReservationDetailId;
-
-								_db.OrderDetails.Add(_mapper.Map<OrderDetails>(order));
-							}
-						}
-					}
-				}
-				else
-				{
-					var reservDetailsFromDb = await _db.ReservationDetails.FirstOrDefaultAsync(u =>
-						u.TableId == reservationDto.ReservationDetails.First().TableId &&
-						u.ReservationHeaderId == reservHeaderFromDb.ReservationHeaderId);
-
-					if (reservDetailsFromDb == null)
-					{
-						
-					}
-					else
-					{
-						
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				_response.Message = ex.Message;
-				_response.IsSuccess = false;
-			}
-
-			return _response;
-		}
+		_response = new ResponseDto();
+		_reservationService = reservationService;
 	}
+
+	[HttpPost]
+	public async Task<ResponseDto> AddReservation(ReservationDto reservationDto)
+	{
+		try
+		{
+			_reservationService.AddReservation(reservationDto);
+		}
+		catch (Exception ex)
+		{
+			_response.Message = ex.Message;
+			_response.IsSuccess = false;
+		}
+
+		return _response;
+	}
+
+	[HttpGet]
+	public async Task<ResponseDto> GetReservations()
+	{
+		try
+		{
+			Request.Cookies.TryGetValue("jwt", out var token);
+			var id = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+			_response.Result = _reservationService.GetReservations(Guid.Parse(id.Value));
+		}
+		catch (Exception ex)
+		{
+			_response.Message = ex.Message;
+			_response.IsSuccess = false;
+		}
+
+		return _response;
+	}
+
+	[HttpPut]
+	public async Task<ResponseDto> UpdateReservation(ReservationDto reservationDto )
+	{
+		try
+		{
+			_reservationService.UpdateReservation(reservationDto);
+		}
+		catch (Exception ex)
+		{
+			_response.Message = ex.Message;
+			_response.IsSuccess = false;
+		}
+
+		return _response;
+	}
+
+	[HttpDelete]
+	[Route("{id:Guid}")]
+	public async Task<ResponseDto> DeleteReservation(Guid id)
+	{
+		try
+		{
+			_reservationService.DeleteReservation(id);
+		}
+		catch (Exception ex)
+		{
+			_response.Message = ex.Message;
+			_response.IsSuccess = false;
+		}
+
+		return _response;
+	}
+
 }

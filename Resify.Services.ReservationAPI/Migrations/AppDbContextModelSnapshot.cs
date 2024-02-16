@@ -22,90 +22,36 @@ namespace Resify.Services.ReservationAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Resify.Services.ReservationAPI.Models.OrderDetails", b =>
+            modelBuilder.Entity("Resify.Services.ReservationAPI.Models.Reservation", b =>
                 {
-                    b.Property<Guid>("OrderDetailsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ReservationDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("OrderDetailsId");
-
-                    b.HasIndex("ReservationDetailsId");
-
-                    b.ToTable("OrderDetails");
-                });
-
-            modelBuilder.Entity("Resify.Services.ReservationAPI.Models.ReservationDetails", b =>
-                {
-                    b.Property<Guid>("ReservationDetailId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ReservationHeaderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TableId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ReservationDetailId");
-
-                    b.HasIndex("ReservationHeaderId");
-
-                    b.ToTable("ReservationDetails");
-                });
-
-            modelBuilder.Entity("Resify.Services.ReservationAPI.Models.ReservationHeader", b =>
-                {
-                    b.Property<Guid>("ReservationHeaderId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EndTime")
+                    b.Property<DateTime>("From")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("StarTime")
+                    b.Property<int>("PeopleCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("To")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ReservationHeaderId");
+                    b.HasKey("Id");
 
                     b.ToTable("ReservationHeaders");
-                });
-
-            modelBuilder.Entity("Resify.Services.ReservationAPI.Models.OrderDetails", b =>
-                {
-                    b.HasOne("Resify.Services.ReservationAPI.Models.ReservationDetails", "ReservationDetails")
-                        .WithMany()
-                        .HasForeignKey("ReservationDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReservationDetails");
-                });
-
-            modelBuilder.Entity("Resify.Services.ReservationAPI.Models.ReservationDetails", b =>
-                {
-                    b.HasOne("Resify.Services.ReservationAPI.Models.ReservationHeader", "ReservationHeader")
-                        .WithMany()
-                        .HasForeignKey("ReservationHeaderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReservationHeader");
                 });
 #pragma warning restore 612, 618
         }

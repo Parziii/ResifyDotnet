@@ -6,45 +6,43 @@ using Microsoft.IdentityModel.Tokens;
 using Resify.Services.AuthAPI.Models;
 using Resify.Services.AuthAPI.Services.IService;
 
-namespace Resify.Services.AuthAPI.Services
+namespace Resify.Services.AuthAPI.Services;
+
+public class JwtTokenGenerator : IJwtTokenGenerator
 {
-	public class JwtTokenGenerator : IJwtTokenGenerator
+	private readonly JwtOptions _jwtOptions;
+
+	public JwtTokenGenerator(IOptions<JwtOptions> jwtOptions)
 	{
-		private readonly JwtOptions _jwtOptions;
+		_jwtOptions = jwtOptions.Value;
+	}
 
-		public JwtTokenGenerator(IOptions<JwtOptions> jwtOptions)
+	public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles)
+	{
+		var tokenHandler = new JwtSecurityTokenHandler();
+
+		var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+
+		var claims = new List<Claim>
 		{
-			_jwtOptions = jwtOptions.Value;
-		}
+			new(JwtRegisteredClaimNames.Email, applicationUser.Email),
+			new(JwtRegisteredClaimNames.Name, applicationUser.Id)
+		};
 
-		public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles)
+		claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+		var tokenDescriptor = new SecurityTokenDescriptor
 		{
-			var tokenHandler = new JwtSecurityTokenHandler();
+			Audience = _jwtOptions.Audience,
+			Issuer = _jwtOptions.Issuer,
+			Subject = new ClaimsIdentity(claims),
+			Expires = DateTime.UtcNow.AddHours(1),
+			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+				SecurityAlgorithms.HmacSha256Signature)
+		};
 
-			var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+		var token = tokenHandler.CreateToken(tokenDescriptor);
 
-			var claims = new List<Claim>
-			{
-				new Claim(JwtRegisteredClaimNames.Email, applicationUser.Email),
-				new Claim(JwtRegisteredClaimNames.Sub, applicationUser.Id),
-				new Claim(JwtRegisteredClaimNames.Name, applicationUser.UserName)
-			};
-
-			claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-			var tokenDescriptor = new SecurityTokenDescriptor()
-			{
-				Audience = _jwtOptions.Audience,
-				Issuer = _jwtOptions.Issuer,
-				Subject = new ClaimsIdentity(claims),
-				Expires = DateTime.UtcNow.AddHours(1),
-				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-					SecurityAlgorithms.HmacSha256Signature)
-			};
-
-			var token = tokenHandler.CreateToken(tokenDescriptor);
-
-			return tokenHandler.WriteToken(token);
-		}
+		return tokenHandler.WriteToken(token);
 	}
 }

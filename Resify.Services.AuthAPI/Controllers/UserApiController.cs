@@ -1,38 +1,87 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Resify.MessageBus;
 using Resify.Services.AuthAPI.Models.Dto;
 using Resify.Services.AuthAPI.Services.IService;
 
-namespace Resify.Services.AuthAPI.Controllers
+namespace Resify.Services.AuthAPI.Controllers;
+
+[Route("api/user")]
+[ApiController]
+public class UserAPIController : ControllerBase
 {
-	[Route("api/user")]
-	[ApiController]
-	public class UserAPIController : ControllerBase
+	private readonly IConfiguration _configuration;
+	private readonly IMessageBus _messageBus;
+	private readonly IUserService _userService;
+	protected ResponseDto _response;
+
+	public UserAPIController(IUserService userService, IMessageBus messageBus, IConfiguration configuration)
 	{
-		private readonly IAuthService _authService;
-		protected ResponseDto _response;
+		_userService = userService;
+		_response = new ResponseDto();
+		_messageBus = messageBus;
+		_configuration = configuration;
+	}
 
-		public UserAPIController(IAuthService authService)
+	[HttpGet]
+	public IActionResult GetUserInfo()
+	{
+		Request.Cookies.TryGetValue("jwt", out var token);
+		var emailClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+		if (emailClaim != null)
 		{
-			_authService = authService;
-			_response = new();
+			var email = emailClaim.Value;
+			var result = _userService.GetUserInfo(email);
+			return Ok(result.Result);
 		}
 
-		[HttpGet]
-		public IActionResult GetUserInfo()
+		return BadRequest("Email claim not found in token");
+	}
+
+	[HttpGet]
+	[Route("change-password")]
+	public IActionResult ChangeUserPassword([FromBody] PasswordDto passwordObject)
+	{
+		Request.Cookies.TryGetValue("jwt", out var token);
+		var emailClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+
+		if (emailClaim != null)
 		{
-
-			Request.Cookies.TryGetValue("jwt", out string token);
-			var claimsIdentity = this.User.Identity as ClaimsIdentity;
-			var emailClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-
-			if (emailClaim != null)
+			var email = emailClaim.Value;
+			try
 			{
-				var email = emailClaim.Value;
-				return Ok(new { Email = email });
+				_response.Result = _userService.ChangePassword(passwordObject, email);
 			}
-
-			return BadRequest("Email claim not found in token");
+			catch (Exception ex)
+			{
+				return StatusCode(401, _response);
+			}
 		}
+
+		return StatusCode(200, _response);
+	}
+
+	[HttpGet]
+	[Route("change-personal-data")]
+	public IActionResult ChangeUserPersonalData([FromBody] PersonalDataDto personalDataDto)
+	{
+		Request.Cookies.TryGetValue("jwt", out var token);
+		var emailClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+
+		if (emailClaim != null)
+		{
+			var email = emailClaim.Value;
+			try
+			{
+				_response.Result = _userService.ChangePersonalData(personalDataDto);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(401, _response);
+			}
+		}
+
+		return StatusCode(200, _response);
 	}
 }

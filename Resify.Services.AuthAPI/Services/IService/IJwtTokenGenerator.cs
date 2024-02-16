@@ -1,9 +1,8 @@
 ﻿using Resify.Services.AuthAPI.Models;
 
-namespace Resify.Services.AuthAPI.Services.IService
+namespace Resify.Services.AuthAPI.Services.IService;
+
+public interface IJwtTokenGenerator
 {
-	public interface IJwtTokenGenerator
-	{
-		string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles);
-	}
+	string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles);
 }

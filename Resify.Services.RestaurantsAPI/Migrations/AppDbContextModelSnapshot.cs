@@ -97,6 +97,26 @@ namespace Resify.Services.RestaurantsAPI.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Resify.Services.RestaurantsAPI.Models.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rate")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("Resify.Services.RestaurantsAPI.Models.Tag", b =>
                 {
                     b.Property<Guid>("Id")

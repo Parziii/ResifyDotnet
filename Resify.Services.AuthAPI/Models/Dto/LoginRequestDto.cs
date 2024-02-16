@@ -1,8 +1,7 @@
-﻿namespace Resify.Services.AuthAPI.Models.Dto
+﻿namespace Resify.Services.AuthAPI.Models.Dto;
+
+public class LoginRequestDto
 {
-    public class LoginRequestDto
-    {
-        public string Email { get; set; }
-        public string Pwd { get; set; }
-    }
+	public string Email { get; set; }
+	public string Pwd { get; set; }
 }

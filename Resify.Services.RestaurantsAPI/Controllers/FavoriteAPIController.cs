@@ -1,86 +1,85 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Resify.Services.RestaurantsAPI.Data;
 using Resify.Services.RestaurantsAPI.Models;
 using Resify.Services.RestaurantsAPI.Models.Dto;
-using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 
-namespace Resify.Services.RestaurantsAPI.Controllers
+namespace Resify.Services.RestaurantsAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class FavoriteAPIController : ControllerBase
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	[Authorize]
-	public class FavoriteAPIController : ControllerBase
+	private readonly AppDbContext _db;
+	private readonly IMapper _mapper;
+	private readonly ResponseDto _response;
+
+	public FavoriteAPIController(AppDbContext db, IMapper mapper)
 	{
-		private readonly AppDbContext _db;
-		private ResponseDto _response;
-		private IMapper _mapper;
+		_mapper = mapper;
+		_db = db;
+		_response = new ResponseDto();
+	}
 
-		public FavoriteAPIController(AppDbContext db, IMapper mapper)
-		{
-			_mapper = mapper;
-			_db = db;
-			_response = new ResponseDto();
-		}
+	[HttpPost]
+	public IActionResult Post([FromBody] RestaurantIdDto restaurant)
+	{
+		Request.Cookies.TryGetValue("jwt", out var token);
+		var nameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
 
-		[HttpPost]
-		public ResponseDto Post([FromBody] RestaurantDto restaurantDto)
+		if (nameClaim != null)
 		{
+			var name = nameClaim.Value;
+
 			try
 			{
-				Restaurant obj = _mapper.Map<Restaurant>(restaurantDto);
-				_db.Restaurants.Add(obj);
+				var favorite = new FavoriteRestaurant
+				{
+					Id = Guid.NewGuid(),
+					RestaurantId = restaurant.RestaurantId,
+					UserId = Guid.Parse(name)
+				};
+				_db.FavoriteRestaurants.Add(favorite);
 				_db.SaveChanges();
-
-				_response.Result = _mapper.Map<RestaurantDto>(obj);
+				_response.Result = _mapper.Map<FavoriteRestaurantDto>(favorite);
 			}
 			catch (Exception e)
 			{
 				_response.IsSuccess = false;
 				_response.Message = e.Message;
+				return StatusCode(500, _response);
 			}
-
-			return _response;
 		}
 
-		[HttpPut]
-		public ResponseDto Put([FromBody] RestaurantDto restaurantDto)
+		return StatusCode(201, _response);
+	}
+
+	[HttpDelete("{id}")]
+	public IActionResult Delete(Guid id)
+	{
+		Request.Cookies.TryGetValue("jwt", out var token);
+		var nameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+		if (nameClaim != null)
 		{
+			var name = nameClaim.Value;
 			try
 			{
-				Restaurant obj = _mapper.Map<Restaurant>(restaurantDto);
-				_db.Restaurants.Update(obj);
-				_db.SaveChanges();
-
-				_response.Result = _mapper.Map<RestaurantDto>(obj);
-			}
-			catch (Exception e)
-			{
-				_response.IsSuccess = false;
-				_response.Message = e.Message;
-			}
-
-			return _response;
-		}
-
-		[HttpDelete]
-		public ResponseDto Delete(Guid id)
-		{
-			try
-			{
-				Restaurant obj = _db.Restaurants.First(r => r.Id == id);
-				_db.Restaurants.Remove(obj);
+				var obj = _db.FavoriteRestaurants.First(r => r.RestaurantId == id && r.UserId == Guid.Parse(name));
+				_db.FavoriteRestaurants.Remove(obj);
 				_db.SaveChanges();
 			}
 			catch (Exception e)
 			{
 				_response.IsSuccess = false;
 				_response.Message = e.Message;
+				return StatusCode(500, _response);
 			}
-
-			return _response;
 		}
+
+		return StatusCode(200, _response);
 	}
 }

@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resify.Services.Reservation
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resfiy.GatewaySolution", "Resfiy.GatewaySolution\Resfiy.GatewaySolution.csproj", "{FA871FBC-F4BA-41E7-B93F-023ED75B108F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resify.MessageBus", "Resify.MessageBus\Resify.MessageBus.csproj", "{6D1003E8-3E32-4E64-9891-E54AF5CCC719}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FA871FBC-F4BA-41E7-B93F-023ED75B108F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA871FBC-F4BA-41E7-B93F-023ED75B108F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA871FBC-F4BA-41E7-B93F-023ED75B108F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D1003E8-3E32-4E64-9891-E54AF5CCC719}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1003E8-3E32-4E64-9891-E54AF5CCC719}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1003E8-3E32-4E64-9891-E54AF5CCC719}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1003E8-3E32-4E64-9891-E54AF5CCC719}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 		{616A466E-99A7-47A5-B6FB-141FB3392659} = {F222D9A2-3082-42A7-8F07-E1BD661FB9CE}
 		{C6E1E9AB-9EFD-47A1-A462-9B30E5045990} = {F222D9A2-3082-42A7-8F07-E1BD661FB9CE}
 		{FA871FBC-F4BA-41E7-B93F-023ED75B108F} = {791FA168-67EC-4E80-A123-97C420A22730}
+		{6D1003E8-3E32-4E64-9891-E54AF5CCC719} = {2E456E67-16CC-4729-B8F4-B02CD429C090}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9BD9EE8F-E1AB-401B-892F-5E9B11C47287}

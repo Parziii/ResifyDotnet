@@ -1,32 +1,35 @@
-using System.Text;
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Resify.MessageBus;
 using Resify.Services.RestaurantsAPI;
 using Resify.Services.RestaurantsAPI.Data;
 using Resify.Services.RestaurantsAPI.Extensions;
+using Resify.Services.RestaurantsAPI.Messaging;
+using Resify.Services.RestaurantsAPI.Services;
+using Resify.Services.RestaurantsAPI.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
 	option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
+var mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-	
+builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
+builder.Services.AddScoped<IMessageBus>(serviceProvider =>
+	new MessageBus(builder.Configuration.GetValue<string>("ServiceBusConnectionString")));
+builder.Services.AddScoped<IFavoriteRestaurantService, FavoriteRestaurantService>();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-	option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
+	option.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		Description = "Enter the Bearer Authorization string as following: 'Bearer Generated-JWT-Token'",
@@ -44,7 +47,8 @@ builder.Services.AddSwaggerGen(option =>
 					Type = ReferenceType.SecurityScheme,
 					Id = JwtBearerDefaults.AuthenticationScheme
 				}
-			}, new string[]{}
+			},
+			new string[] { }
 		}
 	});
 });
@@ -67,6 +71,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 ApplyMigration();
+app.UseAzureServiceBusConsumer();
 app.Run();
 
 void ApplyMigration()
@@ -75,9 +80,6 @@ void ApplyMigration()
 	{
 		var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-		if (_db.Database.GetPendingMigrations().Count() > 0)
-		{
-			_db.Database.Migrate();
-		}
+		if (_db.Database.GetPendingMigrations().Count() > 0) _db.Database.Migrate();
 	}
 }

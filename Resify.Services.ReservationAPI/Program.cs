@@ -1,29 +1,31 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Resify.MessageBus;
 using Resify.Services.ReservationAPI;
 using Resify.Services.ReservationAPI.Data;
 using Resify.Services.ReservationAPI.Extensions;
+using Resify.Services.ReservationAPI.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
 	option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
+var mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
+builder.Services.AddScoped<IMessageBus>(serviceProvider =>
+	new MessageBus(builder.Configuration.GetValue<string>("ServiceBusConnectionString")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-	option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
+	option.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		Description = "Enter the Bearer Authorization string as following: 'Bearer Generated-JWT-Token'",
@@ -41,7 +43,8 @@ builder.Services.AddSwaggerGen(option =>
 					Type = ReferenceType.SecurityScheme,
 					Id = JwtBearerDefaults.AuthenticationScheme
 				}
-			}, new string[]{}
+			},
+			new string[] { }
 		}
 	});
 });
@@ -61,7 +64,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseAzureServiceBusConsumer();
 app.MapControllers();
 ApplyMigration();
 app.Run();
@@ -72,9 +75,6 @@ void ApplyMigration()
 	{
 		var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-		if (_db.Database.GetPendingMigrations().Count() > 0)
-		{
-			_db.Database.Migrate();
-		}
+		if (_db.Database.GetPendingMigrations().Count() > 0) _db.Database.Migrate();
 	}
 }

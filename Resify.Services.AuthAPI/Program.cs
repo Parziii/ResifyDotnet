@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Resify.MessageBus;
 using Resify.Services.AuthAPI.Data;
 using Resify.Services.AuthAPI.Extensions;
 using Resify.Services.AuthAPI.Models;
 using Resify.Services.AuthAPI.Services;
 using Resify.Services.AuthAPI.Services.IService;
+using Resify.Services.ReservationAPI.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +21,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMessageBus>(serviceProvider =>
+	new MessageBus(builder.Configuration.GetValue<string>("ServiceBusConnectionString")));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -39,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAzureServiceBusConsumer();
 
 app.MapControllers();
 ApplyMigration();
@@ -50,9 +57,6 @@ void ApplyMigration()
 	{
 		var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-		if (_db.Database.GetPendingMigrations().Count() > 0)
-		{
-			_db.Database.Migrate();
-		}
+		if (_db.Database.GetPendingMigrations().Count() > 0) _db.Database.Migrate();
 	}
 }
